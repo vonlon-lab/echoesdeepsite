@@ -239,21 +239,58 @@
             text-align: center;
         }
 
-        .reset-btn {
-            background-color: #ff6b6b;
-            color: white;
+        .reset-btn, .github-btn, .contact-btn {
+            background-color: #333;
+            color: var(--text);
             border: none;
             padding: 10px 20px;
             border-radius: 5px;
             cursor: pointer;
             font-weight: bold;
-            margin-top: 20px;
+            margin-top: 10px;
             transition: background-color 0.2s;
             backdrop-filter: blur(2px);
+            border: 1px solid var(--border);
+            display: block;
+            width: 100%;
+            max-width: 300px;
+            margin-left: auto;
+            margin-right: auto;
+            text-align: center;
+        }
+
+        .reset-btn {
+            background-color: #ff6b6b;
         }
 
         .reset-btn:hover {
             background-color: #ff5252;
+        }
+
+        .github-btn {
+            background-color: #333;
+            margin-top: 10px;
+        }
+
+        .github-btn:hover {
+            background-color: #444;
+        }
+
+        .contact-btn {
+            background-color: #0077b6;
+            margin-top: 10px;
+        }
+
+        .contact-btn:hover {
+            background-color: #005f9e;
+        }
+
+        .buttons-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            margin-top: 20px;
         }
 
         @media (max-width: 768px) {
@@ -329,7 +366,11 @@
         </table>
     </div>
 
-    <button class="reset-btn" id="resetBtn">Reset All Progress</button>
+    <div class="buttons-container">
+        <button class="reset-btn" id="resetBtn">Reset All Progress</button>
+        <a href="https://github.com/vonlon-lab/echoesdeepsite" target="_blank" class="github-btn">GitHub</a>
+        <a href="mailto:farkash10@bk.ru" class="contact-btn">Contact</a>
+    </div>
 
     <script>
         // Task data
