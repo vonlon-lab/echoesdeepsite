@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Echo Tracker</title>
+    <style>
+        :root {
+            --bg: #0a1a1f;
+            --text: #e0f0f5;
+            --accent: #6ad4ff;
+            --border: #1c3d47;
+            --hover: #152d35;
+            --checked: #00e699;
+            --card-bg: rgba(10, 30, 40, 0.7);
+            --shadow: rgba(0, 0, 0, 0.6);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            background-image: url('https://static.wikia.nocookie.net/project-deepwoken/images/c/ca/Depths_New_Lightning.png/revision/latest/scale-to-width-down/1000?cb=mod');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-blend-mode: overlay;
+            backdrop-filter: blur(2px);
+            min-height: 100vh;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, rgba(10, 30, 40, 0.8), rgba(5, 20, 30, 0.8));
+            border-radius: 10px;
+            box-shadow: 0 4px 12px var(--shadow);
+            backdrop-filter: blur(4px);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: var(--accent);
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .stat-box {
+            background: var(--card-bg);
+            padding: 15px 20px;
+            border-radius: 8px;
+            text-align: center;
+            min-width: 150px;
+            box-shadow: 0 2px 8px var(--shadow);
+            backdrop-filter: blur(2px);
+            border: 1px solid rgba(106, 212, 255, 0.2);
+        }
+
+        .stat-box h3 {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            color: var(--accent);
+        }
+
+        .stat-box .value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--accent);
+        }
+
+        .rank-display {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            margin: 20px 0;
+            box-shadow: 0 2px 8px var(--shadow);
+            backdrop-filter: blur(2px);
+            border: 1px solid rgba(106, 212, 255, 0.2);
+        }
+
+        .rank-display .rank {
+            font-size: 3rem;
+            font-weight: bold;
+            margin: 10px 0;
+            color: var(--accent);
+            text-shadow: 0 0 10px currentColor;
+        }
+
+        .rank-display .range {
+            font-size: 1.1rem;
+            opacity: 0.8;
+        }
+
+        .modifiers-section {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            box-shadow: 0 2px 8px var(--shadow);
+            backdrop-filter: blur(2px);
+            border: 1px solid rgba(106, 212, 255, 0.2);
+        }
+
+        .modifiers-section h3 {
+            margin-bottom: 15px;
+            color: var(--accent);
+            text-align: center;
+        }
+
+        .modifier-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 10px;
+        }
+
+        .modifier-item {
+            display: flex;
+            align-items: center;
+            padding: 8px;
+            background: rgba(20, 60, 70, 0.3);
+            border-radius: 6px;
+            border: 1px solid rgba(106, 212, 255, 0.1);
+        }
+
+        .modifier-item label {
+            margin-left: 8px;
+            font-size: 0.9rem;
+            flex-grow: 1;
+        }
+
+        .modifier-item .multiplier {
+            font-size: 0.85rem;
+            color: var(--accent);
+            font-weight: bold;
+        }
+
+        .tasks-container {
+            background: var(--card-bg);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px var(--shadow);
+            backdrop-filter: blur(2px);
+            border: 1px solid rgba(106, 212, 255, 0.2);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            background-color: rgba(20, 60, 70, 0.5);
+            font-weight: bold;
+            position: sticky;
+            top: 0;
+            backdrop-filter: blur(2px);
+        }
+
+        tr:hover {
+            background-color: var(--hover);
+        }
+
+        .checkbox-cell {
+            text-align: center;
+        }
+
+        .checkbox-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .custom-checkbox {
+            position: relative;
+            width: 24px;
+            height: 24px;
+            border: 2px solid var(--accent);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .custom-checkbox.checked {
+            background-color: var(--checked);
+            border-color: var(--checked);
+        }
+
+        .custom-checkbox::after {
+            content: '';
+            position: absolute;
+            display: none;
+            left: 7px;
+            top: 3px;
+            width: 6px;
+            height: 12px;
+            border: 2px solid var(--bg);
+            border-top: 0;
+            border-left: 0;
+            transform: rotate(45deg);
+        }
+
+        .custom-checkbox.checked::after {
+            display: block;
+        }
+
+        .task-description {
+            line-height: 1.4;
+        }
+
+        .echo-value {
+            font-weight: bold;
+            color: var(--accent);
+            text-align: center;
+        }
+
+        .reset-btn {
+            background-color: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 20px;
+            transition: background-color 0.2s;
+            backdrop-filter: blur(2px);
+        }
+
+        .reset-btn:hover {
+            background-color: #ff5252;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .stat-box {
+                min-width: 120px;
+            }
+            
+            th, td {
+                padding: 8px;
+                font-size: 0.9rem;
+            }
+            
+            .modifier-list {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Echo Tracker</h1>
+        <p>We block, parry and dodge</p>
+    </header>
+
+    <div class="stats">
+        <div class="stat-box">
+            <h3>Total Echoes</h3>
+            <div class="value" id="totalEchoes">0</div>
+        </div>
+        <div class="stat-box">
+            <h3>With Modifiers</h3>
+            <div class="value" id="totalEchoesWithModifiers">0</div>
+        </div>
+        <div class="stat-box">
+            <h3>Completed</h3>
+            <div class="value" id="completedTasks">0</div>
+        </div>
+        <div class="stat-box">
+            <h3>Total Tasks</h3>
+            <div class="value" id="totalTasks">0</div>
+        </div>
+    </div>
+
+    <div class="modifiers-section">
+        <h3>Modifiers</h3>
+        <div class="modifier-list" id="modifiersList">
+            <!-- Modifiers will be injected via JS -->
+        </div>
+    </div>
+
+    <div class="rank-display">
+        <h3>Your Rank</h3>
+        <div class="rank" id="currentRank">E</div>
+        <div class="range" id="rankRange">0–29</div>
+    </div>
+
+    <div class="tasks-container">
+        <table id="tasksTable">
+            <thead>
+                <tr>
+                    <th>✅</th>
+                    <th>Echo</th>
+                    <th>Task / Requirement</th>
+                </tr>
+            </thead>
+            <tbody id="tasksBody">
+                <!-- Tasks will be injected via JS -->
+            </tbody>
+        </table>
+    </div>
+
+    <button class="reset-btn" id="resetBtn">Reset All Progress</button>
+
+    <script>
+        // Task data
+        const tasks = [
+            { id: 1, echo: 1, description: "Crafting a Food item." },
+            { id: 2, echo: 1, description: "Catching a Fish (or anything using a Fishing Rod)." },
+            { id: 3, echo: 1, description: "Modifying a Mantra." },
+            { id: 4, echo: 1, description: "Turning in a Pure Ore to a Blacksmith. (except for pure iron)" },
+            { id: 5, echo: 1, description: "Winning Chime of Conflict match." },
+            { id: 6, echo: 2, description: "Drinking an Attribute Flask (NOT an Attunement Potion)." },
+            { id: 7, echo: 2, description: "Crafting a Master Armor." },
+            { id: 8, echo: 2, description: "Using a Deep Shrine." },
+            { id: 9, echo: 2, description: "Making a deal with Misérables." },
+            { id: 10, echo: 2, description: "Bargaining with Yun'Shul (e.g., rerolling Resonance). (idol of Yun'Shul counts.)" },
+            { id: 11, echo: 5, description: "Unbonding an Attribute." },
+            { id: 12, echo: 5, description: "Obtaining an Oath." },
+            { id: 13, echo: 5, description: "Soul-bounding an enchanted or legendary item (e.g., Hero Blade of Frost, Crypt Blade)." },
+            { id: 14, echo: 5, description: "Enchanting an Item with an Enchant Stone or Enchant Grease (Do not use it on an enchanted weapon)." },
+            { id: 15, echo: 5, description: "Obtaining an enchant from Laplace." },
+            { id: 16, echo: 5, description: "Using Pluripotent Alloy (requires 75 weapon requirement for most weapons)." },
+            { id: 17, echo: 5, description: "Obtaining a Murmur." },
+            { id: 18, echo: 5, description: "Defeating Dread Serpent OR The Doom of Caeranthil" },
+            { id: 19, echo: 5, description: "Defeating Duke Erisia" },
+            { id: 20, echo: 5, description: "Defeating The Ferryman" },
+            { id: 21, echo: 5, description: "Defeating Chaser" },
+            { id: 22, echo: 5, description: "Defeating Primadon OR Elder Primadon" },
+            { id: 23, echo: 5, description: "Defeating The Doom of Caeranthil or Interluminary Parasol." },
+            { id: 24, echo: 10, description: "Defeating Scion of Ethiron." },
+            { id: 25, echo: 10, description: "Completing Hell Mode." },
+            { id: 26, echo: 10, description: "Completing Layer 2 floor 1 without Light Hook." },
+            { id: 27, echo: 15, description: "Gaining 20 Power (every Power level up will award you with 0.75 Echoes, being 15 at 20 Power level)" },
+            { id: 28, echo: 15, description: "Obtaining a Resonance. (You must CHOOSE it. If you reroll in Fragments of Self, it resets the task, even if you had one before.)" }
+        ];
+
+        // Modifier data
+        const modifiers = [
+            { id: 'fragile_heart', name: 'Fragile Heart', effect: 'All incoming mob damage is doubled.', multiplier: 0.5 }, // +50% → 1.5x
+            { id: 'crestfallen', name: 'Crestfallen', effect: 'Your armor is permanently broken.', multiplier: 0.1 }, // +10% → 1.1x
+            { id: 'deep_champion', name: 'Deep Champion', effect: 'Your Depths trial is always corrupted.', multiplier: 0.2 }, // +20% → 1.2x
+            { id: 'dissonant', name: 'Dissonant', effect: 'You are unable to draw forth your Resonance. (You can still obtain one, but you cannot use it.)', multiplier: 0.3 }, // +30% → 1.3x
+            { id: 'hollow', name: 'Hollow', effect: 'All overworld deaths send you to the Depths.', multiplier: 0.1 }, // +10% → 1.1x
+            { id: 'slowburn', name: 'Slowburn', effect: 'All incoming healing is heavily reduced.', multiplier: 0.1 }, // +10% → 1.1x
+            { id: 'dealbreaker', name: 'Dealbreaker', effect: 'You sell items for 25% less.', multiplier: 0.05 }, // +5% → 1.05x
+            { id: 'loose_change', name: 'Loose Change', effect: 'All damage received makes you lose notes on hit.', multiplier: 0.2 }, // +20% → 1.2x
+            { id: 'high_velocity', name: 'High Velocity', effect: 'All fall damage is heavily amplified, allowing you to die from falls much easier.', multiplier: 0.1 }, // +10% → 1.1x
+            { id: 'ironwoken', name: 'Ironwoken', effect: 'You cannot receive notes or items from other players.', multiplier: 0.1 }, // +10% → 1.1x
+            { id: 'one_bit', name: 'One Bit', effect: 'You don\'t know how to swim.', multiplier: 0.2 }, // +20% → 1.2x
+            { id: 'destined', name: 'Destined', effect: 'You don\'t get to choose what you get when your Power increase. Fate picks for you.', multiplier: 0.2 }, // +20% → 1.2x
+            { id: 'vow_of_thorns', name: 'Vow of Thorns', effect: 'Boost the rate of your progression. However, you are faced with harder trials and every death will send you to the depths.', multiplier: 0.05 }, // +5% → 1.05x
+            { id: 'glass_bones', name: 'Glass Bones', effect: 'Taking any damage will immediately knock you. Only pick this if you wish to embark on an unforgiving challenge.', multiplier: 0 } // +0% → 1.0x
+        ];
+
+        // Ranks
+        const ranks = [
+            { rank: 'W', min: 441, max: Infinity, note: "140 (441 w/ all Echoes Modifiers except Vow of Thorns and Glass Bones)" },
+            { rank: 'S', min: 140, max: Infinity, note: "140 (Must do all Echoes tasks)" },
+            { rank: 'A', min: 112, max: 139, note: "112–139" },
+            { rank: 'B', min: 87, max: 111, note: "87–111" },
+            { rank: 'C', min: 60, max: 86, note: "60–86" },
+            { rank: 'D', min: 30, max: 59, note: "30–59" },
+            { rank: 'E', min: 0, max: 29, note: "0–29" }
+        ];
+
+        // DOM elements
+        const tasksBody = document.getElementById('tasksBody');
+        const totalEchoesEl = document.getElementById('totalEchoes');
+        const totalEchoesWithModifiersEl = document.getElementById('totalEchoesWithModifiers');
+        const completedTasksEl = document.getElementById('completedTasks');
+        const totalTasksEl = document.getElementById('totalTasks');
+        const currentRankEl = document.getElementById('currentRank');
+        const rankRangeEl = document.getElementById('rankRange');
+        const modifiersList = document.getElementById('modifiersList');
+        const resetBtn = document.getElementById('resetBtn');
+
+        // Initialize
+        let completed = {};
+        let activeModifiers = {};
+
+        // Load from localStorage
+        function loadProgress() {
+            const saved = localStorage.getItem('echoTracker');
+            if (saved) {
+                try {
+                    const data = JSON.parse(saved);
+                    completed = data.completed || {};
+                    activeModifiers = data.activeModifiers || {};
+                } catch (e) {
+                    completed = {};
+                    activeModifiers = {};
+                }
+            }
+        }
+
+        // Save to localStorage
+        function saveProgress() {
+            const data = {
+                completed,
+                activeModifiers
+            };
+            localStorage.setItem('echoTracker', JSON.stringify(data));
+        }
+
+        // Get rank by echoes
+        function getRank(echoes) {
+            for (let r of ranks) {
+                if (echoes >= r.min && echoes <= r.max) {
+                    return r;
+                }
+            }
+            return ranks[ranks.length - 1]; // E if something goes wrong
+        }
+
+        // Calculate total multiplier
+        function getTotalMultiplier() {
+            let multiplier = 1.0; // Base multiplier
+            for (const modId in activeModifiers) {
+                if (activeModifiers[modId]) {
+                    const mod = modifiers.find(m => m.id === modId);
+                    if (mod) {
+                        multiplier += mod.multiplier;
+                    }
+                }
+            }
+            return multiplier;
+        }
+
+        // Update stats
+        function updateStats() {
+            let totalEchoes = 0;
+            let completedCount = 0;
+
+            tasks.forEach(task => {
+                if (completed[task.id]) {
+                    totalEchoes += task.echo;
+                    completedCount++;
+                }
+            });
+
+            const multiplier = getTotalMultiplier();
+            const totalWithModifiers = Math.round(totalEchoes * multiplier);
+
+            totalEchoesEl.textContent = totalEchoes;
+            totalEchoesWithModifiersEl.textContent = totalWithModifiers;
+            completedTasksEl.textContent = completedCount;
+            totalTasksEl.textContent = tasks.length;
+
+            const rank = getRank(totalWithModifiers);
+            currentRankEl.textContent = rank.rank;
+            rankRangeEl.textContent = rank.note;
+        }
+
+        // Render tasks table
+        function renderTasks() {
+            tasksBody.innerHTML = '';
+
+            tasks.forEach(task => {
+                const row = document.createElement('tr');
+                
+                // Checkbox cell
+                const checkboxCell = document.createElement('td');
+                checkboxCell.className = 'checkbox-cell';
+                const checkboxWrapper = document.createElement('div');
+                checkboxWrapper.className = 'checkbox-wrapper';
+                const checkbox = document.createElement('div');
+                checkbox.className = 'custom-checkbox' + (completed[task.id] ? ' checked' : '');
+                checkbox.dataset.id = task.id;
+                checkbox.addEventListener('click', toggleTask);
+                checkboxWrapper.appendChild(checkbox);
+                checkboxCell.appendChild(checkboxWrapper);
+
+                // Echo value cell
+                const echoCell = document.createElement('td');
+                echoCell.className = 'echo-value';
+                echoCell.textContent = task.echo;
+
+                // Description cell
+                const descCell = document.createElement('td');
+                descCell.className = 'task-description';
+                descCell.textContent = task.description;
+
+                row.appendChild(checkboxCell);
+                row.appendChild(echoCell);
+                row.appendChild(descCell);
+
+                tasksBody.appendChild(row);
+            });
+        }
+
+        // Render modifiers
+        function renderModifiers() {
+            modifiersList.innerHTML = '';
+
+            modifiers.forEach(mod => {
+                const item = document.createElement('div');
+                item.className = 'modifier-item';
+
+                const checkbox = document.createElement('div');
+                checkbox.className = 'custom-checkbox' + (activeModifiers[mod.id] ? ' checked' : '');
+                checkbox.dataset.id = mod.id;
+                checkbox.addEventListener('click', toggleModifier);
+
+                const label = document.createElement('label');
+                label.textContent = mod.name;
+
+                const multiplierSpan = document.createElement('span');
+                multiplierSpan.className = 'multiplier';
+                multiplierSpan.textContent = `+${Math.round(mod.multiplier * 100)}%`;
+
+                item.appendChild(checkbox);
+                item.appendChild(label);
+                item.appendChild(multiplierSpan);
+
+                modifiersList.appendChild(item);
+            });
+        }
+
+        // Toggle task
+        function toggleTask(e) {
+            const checkbox = e.target;
+            const taskId = parseInt(checkbox.dataset.id);
+            const isChecked = checkbox.classList.contains('checked');
+
+            if (isChecked) {
+                checkbox.classList.remove('checked');
+                delete completed[taskId];
+            } else {
+                checkbox.classList.add('checked');
+                completed[taskId] = true;
+            }
+
+            saveProgress();
+            updateStats();
+        }
+
+        // Toggle modifier
+        function toggleModifier(e) {
+            const checkbox = e.target;
+            const modId = checkbox.dataset.id;
+            const isChecked = checkbox.classList.contains('checked');
+
+            if (isChecked) {
+                checkbox.classList.remove('checked');
+                activeModifiers[modId] = false;
+            } else {
+                checkbox.classList.add('checked');
+                activeModifiers[modId] = true;
+            }
+
+            saveProgress();
+            updateStats();
+        }
+
+        // Reset all progress
+        function resetAll() {
+            if (confirm("Are you sure you want to reset ALL progress?")) {
+                completed = {};
+                activeModifiers = {};
+                saveProgress();
+                renderTasks();
+                renderModifiers();
+                updateStats();
+            }
+        }
+
+        // Init
+        loadProgress();
+        renderTasks();
+        renderModifiers();
+        updateStats();
+
+        // Reset button handler
+        resetBtn.addEventListener('click', resetAll);
+    </script>
+</body>
+</html>
